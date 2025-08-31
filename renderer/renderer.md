@@ -1,49 +1,79 @@
-# Challenge X: Renderer
+# Challenge 1: Renderer
 
 **Category:** Web
-
-## Description
-
-The challenge provided a website where we could upload files, and it hinted that some sort of template rendering was happening in the background. The goal was to exploit this to retrieve the flag.
+**Points:** 498
 
 ## Solution
 
-### Step 1: Initial Analysis
+This web challenge was a capture-the-flag (CTF) puzzle involving a small Flask application. The goal was to exploit a vulnerability to read the contents of a file named `flag.txt` on the server. The solution involved a three-step process to bypass a cookie-based authentication system.
 
-The website had an upload functionality. At first glance, it looked like a simple image uploader, but the challenge name "Renderer" suggested the possibility of a **Server-Side Template Injection (SSTI)** vulnerability.
+---
 
-A common way to test for SSTI is to upload a file with a name containing template syntax like `{{7*7}}`. If the server uses Jinja2 (Python) or a similar engine, this expression would evaluate to `49`.
+### Step 1: Initial Reconnaissance
 
-### Step 2: Testing for SSTI
+After downloading and extracting the `chall.zip` file, the following key files were identified:
 
-I uploaded a harmless file and renamed it to `{{7*7}}.png`. After uploading, I checked how the filename was rendered on the gallery page.
+- `app.py`: The main Flask application logic.
+- `templates/display.html`: A template file.
+- `flag.txt`: The target file containing the flag.
 
-Instead of showing `{{7*7}}`, the website displayed `49`. This confirmed that the filename was being passed through a template engine and executed on the server, proving that the application was vulnerable to SSTI.
+The `display.html` file contained an `<iframe>` tag that seemed to be a potential target for a Server-Side Template Injection (SSTI) attack. However, closer inspection revealed that the filename was concatenated within a single Jinja expression `{{'/static/uploads/' + filename}}`. This means that any input provided for the `filename` parameter would be treated as data, not as a nested template, effectively neutralizing the SSTI attack vector.
 
-### Step 3: Exploiting SSTI
+The `app.py` file contained a `/developer` route that was the key to the challenge. The logic for this route was as follows:
 
-Once SSTI was confirmed, I attempted to escalate the injection to access sensitive files. In Jinja2, one way to do this is by reading `/flag.txt` (a common location for CTF flags).
+- It checks for a cookie named `developer_secret_cookie`.
+- It compares the cookie's value to the contents of a file located at `./static/uploads/secrets/secret_cookie.txt`.
+- If the `secret_cookie.txt` file is empty, it generates a new SHA256 hash and writes it to the file.
+- If the cookie value matches the file content, the server returns the contents of `flag.txt` and then rotates the secret by writing a new one to the file.
 
-The payload looked like this:
+A critical observation was that the `secret_cookie.txt` file was located within the `/static/uploads` directory. This is significant because static files are publicly accessible, meaning we could potentially read the contents of this file directly.
 
+---
+
+### Step 2: Exploitation Strategy
+
+The vulnerability lies in the fact that the secret required for authentication is stored in a publicly accessible location. The exploit strategy leverages this fact in three sequential requests:
+
+1. **Force Secret Generation:** Send a GET request to the `/developer` endpoint without the required cookie. If the `secret_cookie.txt` file is empty, this action will trigger the server to generate and write a new secret to the file.
+2. **Read the Secret:** Send a GET request to the public path `/static/uploads/secrets/secret_cookie.txt` to read the newly generated secret value.
+3. **Authenticate and Get Flag:** Use the secret obtained in the previous step to make a GET request to `/developer`, this time including the `developer_secret_cookie` with the correct value. The server will then return the flag.
+
+---
+
+### Step 3: Raw HTTP Requests
+
+The following raw HTTP requests were used to execute the exploit:
+
+**Request to trigger secret generation:**
+```http
+GET /developer HTTP/1.1
+Host: play.scriptsorcerers.xyz:10268
+Connection: close
 ```
-{{ cycler.__init__.__globals__.os.popen('cat /flag.txt').read() }}
+This request forces the server to create a secret if one doesn't exist. The server responds with "You are not a developer!", but the secret is now in the file.
+
+**Request to read the secret:**
+```http
+GET /static/uploads/secrets/secret_cookie.txt HTTP/1.1
+Host: play.scriptsorcerers.xyz:10268
+Connection: close
 ```
+The response body will contain the new secret, a SHA256 hex string.
 
-This payload uses Jinja2 object traversal to escape into Python internals, call the `os.popen` function, and execute a shell command to read the flag file.
-
-### Step 4: Getting the Flag
-
-I renamed my test file to:
-
+**Request to authenticate and retrieve the flag:**
+```http
+GET /developer HTTP/1.1
+Host: play.scriptsorcerers.xyz:10268
+Cookie: developer_secret_cookie=<the_hex_secret_from_step_2>
+Connection: close
 ```
-{{ cycler.__init__.__globals__.os.popen('cat /flag.txt').read() }}.png
-```
+Upon a successful match, the server responds with the flag. The response body will look like this:
 
-After uploading, instead of the filename, the gallery rendered the contents of `/flag.txt` — which was the flag.
+---
 
-## Flag
+### Result
 
-```
-scriptCTF{example_flag_here}
-```
+By following these steps, the flag was successfully retrieved from the `/developer` endpoint.
+
+**Flag:**
+`scriptCTF{my_c00k135_4r3_n0t_s4f3!}`
