@@ -1,79 +1,82 @@
 # Challenge 1: Renderer
 
-**Category:** Web
+**Type:** Web Challenge
 **Points:** 498
 
-## Solution
+---
 
-This web challenge was a capture-the-flag (CTF) puzzle involving a small Flask application. The goal was to exploit a vulnerability to read the contents of a file named `flag.txt` on the server. The solution involved a three-step process to bypass a cookie-based authentication system.
+## What Was the Challenge About?
+
+This was a fun web hacking challenge where we had to find a way to read a secret file called `flag.txt` from a website. The website was built using Flask.
 
 ---
 
-### Step 1: Initial Reconnaissance
+## How Did We Solve It?
 
-After downloading and extracting the `chall.zip` file, the following key files were identified:
+### Step 1: Looking Around
 
-- `app.py`: The main Flask application logic.
-- `templates/display.html`: A template file.
-- `flag.txt`: The target file containing the flag.
+First, we downloaded and opened the challenge files. Inside, we found:
 
-The `display.html` file contained an `<iframe>` tag that seemed to be a potential target for a Server-Side Template Injection (SSTI) attack. However, closer inspection revealed that the filename was concatenated within a single Jinja expression `{{'/static/uploads/' + filename}}`. This means that any input provided for the `filename` parameter would be treated as data, not as a nested template, effectively neutralizing the SSTI attack vector.
+- `app.py`: The main website code.
+- `display.html`: A webpage template.
+- `flag.txt`: The file we needed to read.
 
-The `app.py` file contained a `/developer` route that was the key to the challenge. The logic for this route was as follows:
+At first, we thought we could trick the website into running code (a common hack called SSTI), but the way the website was built made that impossible.
 
-- It checks for a cookie named `developer_secret_cookie`.
-- It compares the cookie's value to the contents of a file located at `./static/uploads/secrets/secret_cookie.txt`.
-- If the `secret_cookie.txt` file is empty, it generates a new SHA256 hash and writes it to the file.
-- If the cookie value matches the file content, the server returns the contents of `flag.txt` and then rotates the secret by writing a new one to the file.
+Then, we noticed a special page: `/developer`. This page checks for a special cookie called `developer_secret_cookie`. If the cookie matches a secret stored in a file, the website gives us the flag.
 
-A critical observation was that the `secret_cookie.txt` file was located within the `/static/uploads` directory. This is significant because static files are publicly accessible, meaning we could potentially read the contents of this file directly.
+**Important:** The secret was stored in a file called `secret_cookie.txt`, which was inside a folder that anyone could access!
 
 ---
 
-### Step 2: Exploitation Strategy
+### Step 2: How We Tricked the Website
 
-The vulnerability lies in the fact that the secret required for authentication is stored in a publicly accessible location. The exploit strategy leverages this fact in three sequential requests:
+The website had a big mistake: it stored the secret in a place where anyone could read it. Here’s how we took advantage of that:
 
-1. **Force Secret Generation:** Send a GET request to the `/developer` endpoint without the required cookie. If the `secret_cookie.txt` file is empty, this action will trigger the server to generate and write a new secret to the file.
-2. **Read the Secret:** Send a GET request to the public path `/static/uploads/secrets/secret_cookie.txt` to read the newly generated secret value.
-3. **Authenticate and Get Flag:** Use the secret obtained in the previous step to make a GET request to `/developer`, this time including the `developer_secret_cookie` with the correct value. The server will then return the flag.
+1. **Make the Website Create a Secret:**
+   We visited the `/developer` page without any cookie. The website saw that there was no secret, so it created a new one and saved it in `secret_cookie.txt`.
+
+2. **Read the Secret:**
+   We then opened the file `secret_cookie.txt` directly from the website’s public folder. This gave us the secret code.
+
+3. **Get the Flag:**
+   We used the secret code as a cookie and visited `/developer` again. This time, the website recognized us and gave us the flag!
 
 ---
 
-### Step 3: Raw HTTP Requests
+### Step 3: The Exact Steps We Used
 
-The following raw HTTP requests were used to execute the exploit:
+Here are the exact web requests we made:
 
-**Request to trigger secret generation:**
-```http
-GET /developer HTTP/1.1
-Host: play.scriptsorcerers.xyz:10268
-Connection: close
+**First, we asked the website to create a secret:**
 ```
-This request forces the server to create a secret if one doesn't exist. The server responds with "You are not a developer!", but the secret is now in the file.
-
-**Request to read the secret:**
-```http
-GET /static/uploads/secrets/secret_cookie.txt HTTP/1.1
+GET /developer
 Host: play.scriptsorcerers.xyz:10268
-Connection: close
 ```
-The response body will contain the new secret, a SHA256 hex string.
+The website said "You are not a developer!", but it secretly created a new code and saved it.
 
-**Request to authenticate and retrieve the flag:**
-```http
-GET /developer HTTP/1.1
-Host: play.scriptsorcerers.xyz:10268
-Cookie: developer_secret_cookie=<the_hex_secret_from_step_2>
-Connection: close
+**Then, we read the secret code:**
 ```
-Upon a successful match, the server responds with the flag. The response body will look like this:
+GET /static/uploads/secrets/secret_cookie.txt
+Host: play.scriptsorcerers.xyz:10268
+```
+The website sent us the secret code, something like `a94f2d6f...`.
+
+**Finally, we used the secret to get the flag:**
+```
+GET /developer
+Host: play.scriptsorcerers.xyz:10268
+Cookie: developer_secret_cookie=a94f2d6f...
+```
+The website then gave us the flag!
+![My solution screenshot](https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/renderer/renderer_flag.jpg
+)
 
 ---
 
-### Result
+## Final Result
 
-By following these steps, the flag was successfully retrieved from the `/developer` endpoint.
+By following these simple steps, we were able to read the secret file and get the flag!
 
 **Flag:**
-`scriptCTF{my_c00k135_4r3_n0t_s4f3!}`
+`<scriptCTF{REDACTED_FLAG_PASTE_HERE}>`
