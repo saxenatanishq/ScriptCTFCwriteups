@@ -30,8 +30,8 @@ This one was more interesting. In **NoobMaster’s** Discord bio, there were a l
 I remembered that **NoobMaster’s GitHub** was linked on Discord. I found a repo called **scriptsorcerers-creds**. Inside, there was a file named **creds.txt** with:
 
 <div>
-	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint2a.jpg" width="250" style="display:inline-block; margin-right:10px;" />
-	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint2b.jpg" width="250" style="display:inline-block;" />
+	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint2a.jpg" width="800" />
+	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint2b.jpg" width="800" />
 </div>
 scriptCTF2026:scriptCTF2026
 
@@ -52,7 +52,7 @@ After logging in, I checked the page’s source code and found a link to this re
 [scriptCTF/scriptCTF26/OSINT/leaked](https://github.com/scriptCTF/scriptCTF26/tree/main/OSINT/leaked)
 I opened it, and the flag was right there in the repo.
 
-<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint3.jpg" width="250" />
+<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint3.jpg" width="800" />
 
 **Flag:**
 `scriptCTF{2026_fl4g_f0und_1n_2025}`
@@ -70,7 +70,9 @@ This was the actual challenge. Inside the **Insider-3** repo, there was a folder
 ### Step 1: Locate the Fireworks
 
 I checked the **fireworks.jpg** comments and found a hidden message:
-<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4.jpg" width="250" />
+<div>
+	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4.jpg" width="800" />
+</div>
 _"Great fireworks! Thanks to the Wendell family for organizing these!"_
 
 A quick Google search revealed that the **Wendell family** is known for organizing fireworks in **Rockport, Texas**. So, the location was **Rockport, TX**.
@@ -80,8 +82,8 @@ A quick Google search revealed that the **Wendell family** is known for organizi
 I opened **room.jpg**, which showed hotel rooms near the water. This meant a hotel by the sea or riverside. I used **Google Maps Street View** to search along the only street near the water. After some scrolling, I matched the hotel—**Days Inn by Wyndham Rockport Texas**.
 
 <div>
-	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4a.jpg" width="250" style="display:inline-block; margin-right:10px;" />
-	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4d.jpg" width="250" style="display:inline-block;" />
+	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4a.jpg" width="600" />
+	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4d.jpg" width="800" />
 </div>
 
 ### Step 3: Find the Room Number
@@ -92,16 +94,16 @@ The flag format was:
 The hotel address was **901 Hwy 35 N**. For the room number, I observed the room numbering style from Google Maps photos. Ground floor rooms started with **1xx**, and the first floor started with **2xx**. The room in the photo was on the ground floor.
 
 <div>
-	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4c.jpg" width="250" style="display:inline-block; margin-right:10px;" />
-	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4b.jpg" width="250" style="display:inline-block;" />
+	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4c.jpg" width="600" />
+	<img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4b.jpg" width="600" />
 </div>
 
 I counted the rooms around the swimming pool—about **7 rooms before the pool** and **7 after**. Our room was on the right side, after the pool, so it had to be between **107–114**. Since the challenge allowed **6 tries**, I brute-forced it. After a few attempts, **111** worked!
 <img src="https://github.com/saxenatanishq/ScriptCTFCwriteups/blob/main/Osint/osint4e.jpg" width="250" />
 
 <div>
-	<img src="https://github.com/scriptCTF/scriptCTF2025-OfficialWriteups/blob/main/OSINT/The%20Insider%204/numbers.png" width="250" style="display:inline-block; margin-right:10px;" />
-	<img src="https://github.com/scriptCTF/scriptCTF2025-OfficialWriteups/blob/main/OSINT/The%20Insider%204/calculations.png" width="250" style="display:inline-block;" />
+	<img src="https://github.com/scriptCTF/scriptCTF2025-OfficialWriteups/blob/main/OSINT/The%20Insider%204/numbers.png" width="600" />
+	<img src="https://github.com/scriptCTF/scriptCTF2025-OfficialWriteups/blob/main/OSINT/The%20Insider%204/calculations.png" width="600" />
 </div>
 
 **Flag:**
